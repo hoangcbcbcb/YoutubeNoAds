@@ -1,0 +1,69 @@
+name: Build TubeShield iOS App (.ipa)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Package IPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Version
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app
+          xcodebuild -version
+
+      - name: Build TubeShield App
+        run: |
+          xcodebuild -project TubeShield.xcodeproj \
+                     -scheme TubeShield \
+                     -configuration Release \
+                     -sdk iphoneos \
+                     -derivedDataPath build \
+                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGN_IDENTITY="" \
+                     clean build
+
+      - name: Package into IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/TubeShield.app Payload/
+          zip -qr TubeShield.ipa Payload
+          ls -la TubeShield.ipa
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TubeShield-iOS-IPA
+          path: TubeShield.ipa
+          retention-days: 30
+
+      - name: Create GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: TubeShield.ipa
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## TubeShield - YouTube AdBlock & Background Play for iOS 18
+            - ✨ Chặn mọi quảng cáo video (pre-roll, mid-roll) & banner.
+            - 🎵 Phát âm thanh nền khi tắt màn hình / chuyển app (Background Audio).
+            - ⚡ Tự động bỏ qua đoạn tài trợ / quảng cáo trong video (SponsorBlock).
+            - 📺 Hỗ trợ Picture-in-Picture (PiP) thu nhỏ góc màn hình.
+            
+            ### Cách cài đặt:
+            1. Tải file `TubeShield.ipa` bên dưới.
+            2. Sử dụng **Sideloadly** (trên máy tính Windows) hoặc **AltStore** / **SideStore** để cài lên iPhone.
+            3. Vào `Cài đặt` -> `Cài đặt chung` -> `Quản lý VPN & Thiết bị` -> Tin cậy chứng chỉ của bạn.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
