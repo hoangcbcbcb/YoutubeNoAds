@@ -115,6 +115,10 @@
         const currentTime = video.currentTime;
 
         for (const seg of segments) {
+            // Guard: Do not skip if segment end is past video duration or invalid
+            if (!isFinite(seg.start) || !isFinite(seg.end) || seg.end <= seg.start) continue;
+            if (video.duration && seg.end >= (video.duration - 2.0)) continue;
+
             if (currentTime >= seg.start && currentTime < (seg.end - 0.2)) {
                 console.log(`[TubeShield] Skipping sponsor (${seg.category}): ${seg.start} -> ${seg.end}`);
                 video.currentTime = seg.end;

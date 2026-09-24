@@ -1,6 +1,6 @@
 //
 //  adblock.js
-//  TubeShield - Ultra Fast YouTube Ad Blocker & Skipper for iOS
+//  TubeShield - Safe & Fast YouTube Ad Blocker (No False Skips)
 //
 
 (function() {
@@ -11,15 +11,13 @@
 
     console.log("[TubeShield] AdBlock script initialized.");
 
-    // 1. Inject CSS to hide all YouTube banner, companion, and feed ads
+    // 1. Inject CSS to hide all banner, promo, and companion ads
     const cssRules = `
         /* Hide all ad containers and sponsored elements */
         .ad-showing .ytp-ad-player-overlay,
-        .ytp-ad-module,
         .ytp-ad-overlay-container,
         .ytp-ad-message-container,
         .ytp-ad-survey,
-        .video-ads,
         ytm-promoted-sparkles-web-renderer,
         ytd-promoted-sparkles-web-renderer,
         ytm-promoted-video-renderer,
@@ -38,11 +36,11 @@
         ytm-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
         ytm-item-section-renderer[data-type="ad"],
         ytm-pivot-bar-item-renderer[aria-label*="Sponsor"],
+        ytmusic-mealbar-promo-renderer,
         .mealbar-promo-renderer {
             display: none !important;
             visibility: hidden !important;
             height: 0 !important;
-            width: 0 !important;
             pointer-events: none !important;
             opacity: 0 !important;
         }
@@ -74,59 +72,55 @@
         '.ytp-ad-skip-ad-button'
     ];
 
-    let lastSkippedTime = 0;
-
     function handleVideoAds() {
         const player = document.querySelector('#movie_player, .html5-video-player, ytm-player');
         const video = document.querySelector('video');
+        if (!video) return;
 
-        // Check if an ad is currently playing
+        // CRITICAL FIX: Only treat as ad if the player explicitly has ad-showing or ad-interrupting classes.
+        // DO NOT check .ytp-ad-module because it is an empty container present in EVERY video!
         const isAdShowing = player && (
             player.classList.contains('ad-showing') ||
-            player.classList.contains('ad-interrupting') ||
-            document.querySelector('.ytp-ad-player-overlay, .ytp-ad-module, .ytp-ad-text') !== null
+            player.classList.contains('ad-interrupting')
         );
 
-        if (video && isAdShowing) {
-            // Instant fast forward and mute to skip ad seamlessly
-            try {
-                video.muted = true;
-                video.playbackRate = 16.0;
-                if (!isNaN(video.duration) && isFinite(video.duration) && video.duration > 0) {
-                    video.currentTime = video.duration;
-                }
-            } catch (e) {}
+        if (isAdShowing) {
+            // SAFETY CHECK: Ads are rarely longer than 120 seconds. If video duration is > 120s, it is a real song!
+            const duration = video.duration;
+            const isSafeToSkip = !isNaN(duration) && isFinite(duration) && duration > 0 && duration <= 120;
 
-            // Click any available skip button
+            if (isSafeToSkip) {
+                try {
+                    video.playbackRate = 16.0;
+                    video.currentTime = duration;
+                } catch (e) {}
+            }
+
+            // Click any available skip button immediately
             for (const selector of skipButtonSelectors) {
                 const buttons = document.querySelectorAll(selector);
                 buttons.forEach(btn => {
-                    try {
-                        btn.click();
-                        lastSkippedTime = Date.now();
-                    } catch (e) {}
+                    try { btn.click(); } catch (e) {}
                 });
             }
-        } else if (video && !isAdShowing && (Date.now() - lastSkippedTime < 1000)) {
-            // Restore playback rate after ad skipped
-            try {
-                if (video.playbackRate > 2.0) {
-                    video.playbackRate = 1.0;
-                }
-            } catch (e) {}
+        } else {
+            // Normal video playback: Ensure audio is not muted and playback rate is normal
+            if (video.playbackRate > 2.0) {
+                video.playbackRate = 1.0;
+            }
+            if (video.muted && !video.__tubeshield_user_muted) {
+                video.muted = false;
+            }
         }
 
-        // Remove overlay / popup ads
+        // Remove overlay / popup ad boxes
         const overlays = document.querySelectorAll('.ytp-ad-overlay-container, .ytp-ad-message-container');
-        overlays.forEach(el => {
-            el.remove();
-        });
+        overlays.forEach(el => el.remove());
     }
 
-    // 3. Run ad checker loop
-    setInterval(handleVideoAds, 100);
+    // Run checker
+    setInterval(handleVideoAds, 300);
 
-    // 4. Observer for dynamic DOM insertions
     const observer = new MutationObserver(() => {
         injectStyles();
         handleVideoAds();
@@ -134,10 +128,8 @@
 
     observer.observe(document.documentElement, {
         childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class', 'src']
+        subtree: true
     });
 
-    console.log("[TubeShield] AdBlock active.");
+    console.log("[TubeShield] Safe AdBlock active.");
 })();

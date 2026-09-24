@@ -33,20 +33,12 @@
   },
   {
     "trigger": {
-      "url-filter": ".*googlevideo\\.com/videoplayback.*(&adformat=|[?&]ctier=A).*"
-    },
-    "action": {
-      "type": "block"
-    }
-  },
-  {
-    "trigger": {
       "url-filter": ".*",
-      "if-domain": ["*youtube.com"]
+      "if-domain": ["*youtube.com", "*music.youtube.com"]
     },
     "action": {
       "type": "css-display-none",
-      "selector": ".ad-showing, .ytp-ad-module, .ytp-ad-overlay-container, ytm-promoted-sparkles-web-renderer, ytd-promoted-sparkles-web-renderer, ytm-promoted-video-renderer, ytm-companion-ad-renderer, ytm-statement-banner-renderer, ytd-in-feed-ad-layout-renderer, ytd-ad-slot-renderer, ytm-ad-slot-renderer, #masthead-ad"
+      "selector": ".ad-showing, .ytp-ad-module, .ytp-ad-overlay-container, ytm-promoted-sparkles-web-renderer, ytd-promoted-sparkles-web-renderer, ytm-promoted-video-renderer, ytm-companion-ad-renderer, ytm-statement-banner-renderer, ytd-in-feed-ad-layout-renderer, ytd-ad-slot-renderer, ytm-ad-slot-renderer, #masthead-ad, ytmusic-mealbar-promo-renderer"
     }
   }
 ]

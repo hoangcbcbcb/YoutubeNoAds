@@ -58,7 +58,7 @@ class AppSettings: ObservableObject {
         }
         
         if UserDefaults.standard.object(forKey: "isAutoPiPEnabled") == nil {
-            self.isAutoPiPEnabled = true
+            self.isAutoPiPEnabled = false
         } else {
             self.isAutoPiPEnabled = UserDefaults.standard.bool(forKey: "isAutoPiPEnabled")
         }

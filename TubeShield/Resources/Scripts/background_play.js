@@ -1,6 +1,6 @@
 //
 //  background_play.js
-//  TubeShield - Bulletproof Background Playback & Lock Screen Media Sync
+//  TubeShield - Seamless Background Playback & Lock Screen Sync
 //
 
 (function() {
@@ -9,25 +9,9 @@
     if (window.__tubeshield_background_injected) return;
     window.__tubeshield_background_injected = true;
 
-    console.log("[TubeShield] Background playback script initializing...");
+    console.log("[TubeShield] Background playback script initialized.");
 
-    let userIntentPaused = false;
-
-    // 1. Intercept addEventListener to prevent YouTube from registering visibility/blur/pagehide pause listeners
-    const originalAddEventListener = EventTarget.prototype.addEventListener;
-    EventTarget.prototype.addEventListener = function(type, listener, options) {
-        if (
-            type === 'visibilitychange' ||
-            type === 'webkitvisibilitychange' ||
-            type === 'pagehide'
-        ) {
-            // Block YouTube from listening to backgrounding events
-            return;
-        }
-        return originalAddEventListener.call(this, type, listener, options);
-    };
-
-    // 2. Spoof Visibility APIs (Always reported as visible & active)
+    // 1. Spoof Visibility APIs (Always visible to prevent tab suspension)
     try {
         Object.defineProperty(document, 'hidden', {
             get: () => false,
@@ -45,51 +29,20 @@
             get: () => false,
             configurable: true
         });
-        if (document.hasFocus) {
-            document.hasFocus = () => true;
-        }
     } catch (e) {
         console.warn("[TubeShield] Visibility defineProperty error:", e);
     }
 
-    // 3. Track explicit user intent (Pause button tapped vs system backgrounding)
-    document.addEventListener('click', (e) => {
-        const target = e.target;
-        if (!target) return;
-
-        // Check if user tapped a pause button
-        if (
-            target.closest('.ytp-play-button') ||
-            target.closest('button[aria-label*="Pause"]') ||
-            target.closest('button[aria-label*="Tạm dừng"]') ||
-            target.closest('.play-pause-button')
-        ) {
-            const video = document.querySelector('video');
-            if (video && !video.paused) {
-                userIntentPaused = true;
-            } else {
-                userIntentPaused = false;
-            }
-        } else if (
-            target.closest('button[aria-label*="Play"]') ||
-            target.closest('button[aria-label*="Phát"]')
-        ) {
-            userIntentPaused = false;
-        }
-    }, true);
-
-    // 4. Intercept HTMLMediaElement.prototype.pause
-    const originalPause = HTMLMediaElement.prototype.pause;
-    HTMLMediaElement.prototype.pause = function() {
-        // If pause was called automatically while user did NOT want to pause, prevent it
-        if (!userIntentPaused) {
-            console.log("[TubeShield] Intercepted and blocked involuntary pause.");
-            return;
-        }
-        return originalPause.apply(this, arguments);
+    // 2. Intercept visibilitychange events so YouTube player does not get paused
+    const stopPropagation = (e) => {
+        e.stopImmediatePropagation();
     };
+    window.addEventListener('visibilitychange', stopPropagation, true);
+    document.addEventListener('visibilitychange', stopPropagation, true);
+    window.addEventListener('webkitvisibilitychange', stopPropagation, true);
+    document.addEventListener('webkitvisibilitychange', stopPropagation, true);
 
-    // 5. Video event listeners and auto-recovery
+    // 3. Attach listeners to video element
     function attachVideoListeners(video) {
         if (!video || video.__tubeshield_hooked) return;
         video.__tubeshield_hooked = true;
@@ -97,25 +50,21 @@
         video.setAttribute('playsinline', '');
         video.setAttribute('webkit-playsinline', '');
 
+        // Ensure video is not muted by default
+        if (video.muted && !video.__tubeshield_user_muted) {
+            video.muted = false;
+        }
+
         video.addEventListener('play', () => {
-            userIntentPaused = false;
             sendNowPlayingInfo(video);
         });
 
         video.addEventListener('pause', () => {
-            if (!userIntentPaused) {
-                // If paused by system or page switch, resume automatically!
-                setTimeout(() => {
-                    if (!userIntentPaused && video.paused) {
-                        video.play().catch(() => {});
-                    }
-                }, 50);
-            }
             sendNowPlayingInfo(video);
         });
 
         video.addEventListener('timeupdate', () => {
-            if (Math.floor(video.currentTime) % 4 === 0) {
+            if (Math.floor(video.currentTime) % 5 === 0) {
                 sendNowPlayingInfo(video);
             }
         });
@@ -125,7 +74,7 @@
         });
     }
 
-    // 6. Extract Metadata and Send to Lock Screen
+    // 4. Extract Video/Song Info for iOS Lock Screen & Control Center
     function extractVideoInfo() {
         let title = "";
         let artist = "";
@@ -173,7 +122,7 @@
 
         const info = extractVideoInfo();
         const payload = {
-            title: info.title || "YouTube Audio",
+            title: info.title || "YouTube",
             artist: info.artist || "YouTube",
             artworkUrl: info.artworkUrl,
             duration: isFinite(video.duration) ? video.duration : 0,
@@ -186,9 +135,8 @@
         } catch (e) {}
     }
 
-    // 7. Lock Screen Commands Handlers
+    // 5. Remote Lock Screen Handlers
     window.__tubeshield_play = function() {
-        userIntentPaused = false;
         const video = document.querySelector('video');
         if (video) {
             video.play().catch(() => {});
@@ -196,10 +144,9 @@
     };
 
     window.__tubeshield_pause = function() {
-        userIntentPaused = true;
         const video = document.querySelector('video');
         if (video) {
-            originalPause.apply(video);
+            video.pause();
         }
     };
 
@@ -217,17 +164,12 @@
         }
     };
 
-    // Attach to existing or newly created video elements
+    // Attach to video
     setInterval(() => {
         const video = document.querySelector('video');
         if (video) {
             attachVideoListeners(video);
-            // If playing in background, ensure it stays unpaused
-            if (!userIntentPaused && video.paused && !video.ended) {
-                video.play().catch(() => {});
-            }
         }
-    }, 800);
+    }, 1000);
 
-    console.log("[TubeShield] Background playback script active.");
 })();
