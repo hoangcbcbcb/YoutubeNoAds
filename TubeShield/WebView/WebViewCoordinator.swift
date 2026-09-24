@@ -52,7 +52,13 @@ class WebViewCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScript
         let userScript = WKUserScript(source: pipScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         controller.addUserScript(userScript)
         
-        // 5. Load Content Rule List (declarative blocking)
+        // 5. Audio-Only & YouTube Music Integration Script
+        if let audioScript = loadScript(name: "audio_only") {
+            let audioUserScript = WKUserScript(source: audioScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+            controller.addUserScript(audioUserScript)
+        }
+        
+        // 6. Load Content Rule List (declarative blocking)
         if settings.isAdBlockEnabled {
             loadContentRuleList(into: controller)
         }
@@ -127,6 +133,9 @@ class WebViewCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScript
         onCanGoForwardChange?(webView.canGoForward)
         if let title = webView.title {
             onTitleChange?(title)
+        }
+        if settings.isAudioOnlyMode {
+            webView.evaluateJavaScript("window.__tubeshield_setAudioOnly && window.__tubeshield_setAudioOnly(true);", completionHandler: nil)
         }
     }
     

@@ -94,6 +94,38 @@ struct SettingsView: View {
                     }
                 }
                 
+                Section(header: Text("CHẾ ĐỘ YOUTUBE MUSIC & AUDIO ONLY")) {
+                    Toggle(isOn: $settings.isAudioOnlyMode) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Chỉ nghe âm thanh (Audio-Only)")
+                                    .font(.body)
+                                Text("Tắt video, hạ chất lượng xuống 144p để tiết kiệm 90% pin & 4G")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "headphones")
+                                .foregroundColor(.cyan)
+                        }
+                    }
+                    
+                    Toggle(isOn: $settings.isMusicMode) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Chế độ YouTube Music")
+                                    .font(.body)
+                                Text("Sử dụng giao diện music.youtube.com")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "music.note.list")
+                                .foregroundColor(.pink)
+                        }
+                    }
+                }
+                
                 Section(header: Text("DỮ LIỆU & BỘ NHỚ")) {
                     Button(role: .destructive) {
                         showClearAlert = true

@@ -1,0 +1,7 @@
+# Build output and archives
+build_output/
+*.ipa
+Payload/
+.DS_Store
+*.xcuserdata/
+DerivedData/

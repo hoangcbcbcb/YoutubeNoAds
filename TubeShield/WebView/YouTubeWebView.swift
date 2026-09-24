@@ -19,6 +19,8 @@ struct YouTubeWebView: UIViewRepresentable {
     @Binding var goForwardTrigger: Bool
     @Binding var goHomeTrigger: Bool
     @Binding var pipTrigger: Bool
+    @Binding var toggleMusicTrigger: Bool
+    @Binding var toggleAudioOnlyTrigger: Bool
     
     func makeCoordinator() -> WebViewCoordinator {
         return WebViewCoordinator(settings: settings)
@@ -65,7 +67,8 @@ struct YouTubeWebView: UIViewRepresentable {
         }
         
         // Load initial YouTube URL
-        let initialURL = URL(string: "https://m.youtube.com")!
+        let initialURLString = settings.isMusicMode ? "https://music.youtube.com" : "https://m.youtube.com"
+        let initialURL = URL(string: initialURLString)!
         webView.load(URLRequest(url: initialURL))
         
         return webView
@@ -87,11 +90,23 @@ struct YouTubeWebView: UIViewRepresentable {
         }
         if goHomeTrigger {
             DispatchQueue.main.async { self.goHomeTrigger = false }
-            uiView.load(URLRequest(url: URL(string: "https://m.youtube.com")!))
+            let url = settings.isMusicMode ? "https://music.youtube.com" : "https://m.youtube.com"
+            uiView.load(URLRequest(url: URL(string: url)!))
         }
         if pipTrigger {
             DispatchQueue.main.async { self.pipTrigger = false }
             uiView.evaluateJavaScript("window.__tubeshield_triggerPiP && window.__tubeshield_triggerPiP();", completionHandler: nil)
+        }
+        if toggleMusicTrigger {
+            DispatchQueue.main.async { self.toggleMusicTrigger = false }
+            settings.isMusicMode.toggle()
+            let destination = settings.isMusicMode ? "https://music.youtube.com" : "https://m.youtube.com"
+            uiView.load(URLRequest(url: URL(string: destination)!))
+        }
+        if toggleAudioOnlyTrigger {
+            DispatchQueue.main.async { self.toggleAudioOnlyTrigger = false }
+            settings.isAudioOnlyMode.toggle()
+            uiView.evaluateJavaScript("window.__tubeshield_setAudioOnly && window.__tubeshield_setAudioOnly(\(settings.isAudioOnlyMode));", completionHandler: nil)
         }
     }
     

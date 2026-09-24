@@ -19,6 +19,8 @@ struct ContentView: View {
     @State private var goForwardTrigger = false
     @State private var goHomeTrigger = false
     @State private var pipTrigger = false
+    @State private var toggleMusicTrigger = false
+    @State private var toggleAudioOnlyTrigger = false
     
     @State private var showSettings = false
     
@@ -27,10 +29,35 @@ struct ContentView: View {
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                // Audio-Only Status Banner
+                if settings.isAudioOnlyMode {
+                    HStack {
+                        Image(systemName: "headphones")
+                            .foregroundColor(.cyan)
+                        Text("Chế độ chỉ nghe nhạc (Tiết kiệm 90% pin & 4G)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.cyan)
+                        Spacer()
+                        Button("Tắt") {
+                            toggleAudioOnlyTrigger = true
+                        }
+                        .font(.caption2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.cyan.opacity(0.2))
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.black.opacity(0.85))
+                }
+                
                 // Loading progress indicator
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(LinearProgressViewStyle(tint: .red))
+                        .progressViewStyle(LinearProgressViewStyle(tint: settings.isMusicMode ? .pink : .red))
                         .frame(height: 2)
                 }
                 
@@ -45,7 +72,9 @@ struct ContentView: View {
                     goBackTrigger: $goBackTrigger,
                     goForwardTrigger: $goForwardTrigger,
                     goHomeTrigger: $goHomeTrigger,
-                    pipTrigger: $pipTrigger
+                    pipTrigger: $pipTrigger,
+                    toggleMusicTrigger: $toggleMusicTrigger,
+                    toggleAudioOnlyTrigger: $toggleAudioOnlyTrigger
                 )
                 .edgesIgnoringSafeArea([.top, .horizontal])
                 
@@ -58,7 +87,7 @@ struct ContentView: View {
                 .environmentObject(settings)
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-            if settings.isAutoPiPEnabled {
+            if settings.isAutoPiPEnabled && !settings.isAudioOnlyMode {
                 pipTrigger = true
             }
         }
@@ -72,7 +101,7 @@ struct ContentView: View {
                 goBackTrigger = true
             } label: {
                 Image(systemName: "chevron.backward")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(canGoBack ? .white : .gray.opacity(0.4))
                     .frame(maxWidth: .infinity)
             }
@@ -83,7 +112,7 @@ struct ContentView: View {
                 goForwardTrigger = true
             } label: {
                 Image(systemName: "chevron.forward")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(canGoForward ? .white : .gray.opacity(0.4))
                     .frame(maxWidth: .infinity)
             }
@@ -94,9 +123,37 @@ struct ContentView: View {
                 goHomeTrigger = true
             } label: {
                 Image(systemName: "house.fill")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
+            }
+            
+            // YouTube Music Switcher Button (Red/Pink when active)
+            Button {
+                toggleMusicTrigger = true
+            } label: {
+                VStack(spacing: 1) {
+                    Image(systemName: "music.note")
+                        .font(.system(size: 17, weight: .semibold))
+                    Text(settings.isMusicMode ? "Music" : "Video")
+                        .font(.system(size: 9, weight: .bold))
+                }
+                .foregroundColor(settings.isMusicMode ? .pink : .gray)
+                .frame(maxWidth: .infinity)
+            }
+            
+            // Audio-Only (Music Mode) Toggle Button (Cyan when active)
+            Button {
+                toggleAudioOnlyTrigger = true
+            } label: {
+                VStack(spacing: 1) {
+                    Image(systemName: settings.isAudioOnlyMode ? "headphones" : "headphones")
+                        .font(.system(size: 17, weight: .semibold))
+                    Text("Only Audio")
+                        .font(.system(size: 9, weight: .bold))
+                }
+                .foregroundColor(settings.isAudioOnlyMode ? .cyan : .gray)
+                .frame(maxWidth: .infinity)
             }
             
             // Picture-in-Picture Button
@@ -104,18 +161,8 @@ struct ContentView: View {
                 pipTrigger = true
             } label: {
                 Image(systemName: "pip.enter")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.green)
-                    .frame(maxWidth: .infinity)
-            }
-            
-            // Reload Button
-            Button {
-                reloadTrigger = true
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
             }
             
@@ -124,12 +171,12 @@ struct ContentView: View {
                 showSettings = true
             } label: {
                 Image(systemName: "gearshape.fill")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
             }
         }
-        .frame(height: 48)
+        .frame(height: 50)
         .background(
             Rectangle()
                 .fill(.ultraThinMaterial)

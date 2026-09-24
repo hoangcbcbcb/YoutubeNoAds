@@ -29,6 +29,14 @@ class AppSettings: ObservableObject {
         didSet { UserDefaults.standard.set(desktopMode, forKey: "desktopMode") }
     }
     
+    @Published var isAudioOnlyMode: Bool {
+        didSet { UserDefaults.standard.set(isAudioOnlyMode, forKey: "isAudioOnlyMode") }
+    }
+    
+    @Published var isMusicMode: Bool {
+        didSet { UserDefaults.standard.set(isMusicMode, forKey: "isMusicMode") }
+    }
+    
     init() {
         // Defaults: Everything enabled for the best YouTube experience
         if UserDefaults.standard.object(forKey: "isAdBlockEnabled") == nil {
@@ -56,5 +64,7 @@ class AppSettings: ObservableObject {
         }
         
         self.desktopMode = UserDefaults.standard.bool(forKey: "desktopMode")
+        self.isAudioOnlyMode = UserDefaults.standard.bool(forKey: "isAudioOnlyMode")
+        self.isMusicMode = UserDefaults.standard.bool(forKey: "isMusicMode")
     }
 }

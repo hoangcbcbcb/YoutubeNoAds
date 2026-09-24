@@ -20,6 +20,7 @@
 		1A00002A2C00000100000001 /* pip_controller.js in Resources */ = {isa = PBXBuildFile; fileRef = 1A00001A2C00000100000001 /* pip_controller.js */; };
 		1A00002B2C00000100000001 /* adblock_content_rules.json in Resources */ = {isa = PBXBuildFile; fileRef = 1A00001B2C00000100000001 /* adblock_content_rules.json */; };
 		1A00002C2C00000100000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A00001E2C00000100000001 /* Assets.xcassets */; };
+		1A00002D2C00000100000001 /* audio_only.js in Resources */ = {isa = PBXBuildFile; fileRef = 1A00001F2C00000100000001 /* audio_only.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 		1A00001C2C00000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A00001D2C00000100000001 /* TubeShield.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TubeShield.entitlements; sourceTree = "<group>"; };
 		1A00001E2C00000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1A00001F2C00000100000001 /* audio_only.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = audio_only.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				1A0000182C00000100000001 /* sponsorblock.js */,
 				1A0000192C00000100000001 /* background_play.js */,
 				1A00001A2C00000100000001 /* pip_controller.js */,
+				1A00001F2C00000100000001 /* audio_only.js */,
 			);
 			path = Scripts;
 			sourceTree = "<group>";
@@ -193,6 +196,7 @@
 				1A00002A2C00000100000001 /* pip_controller.js in Resources */,
 				1A00002B2C00000100000001 /* adblock_content_rules.json in Resources */,
 				1A00002C2C00000100000001 /* Assets.xcassets in Resources */,
+				1A00002D2C00000100000001 /* audio_only.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
