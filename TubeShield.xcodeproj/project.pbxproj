@@ -21,6 +21,7 @@
 		1A00002B2C00000100000001 /* adblock_content_rules.json in Resources */ = {isa = PBXBuildFile; fileRef = 1A00001B2C00000100000001 /* adblock_content_rules.json */; };
 		1A00002C2C00000100000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A00001E2C00000100000001 /* Assets.xcassets */; };
 		1A00002D2C00000100000001 /* audio_only.js in Resources */ = {isa = PBXBuildFile; fileRef = 1A00001F2C00000100000001 /* audio_only.js */; };
+		1A0000362C00000100000001 /* SilentAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000352C00000100000001 /* SilentAudioPlayer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 		1A00001D2C00000100000001 /* TubeShield.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TubeShield.entitlements; sourceTree = "<group>"; };
 		1A00001E2C00000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A00001F2C00000100000001 /* audio_only.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = audio_only.js; sourceTree = "<group>"; };
+		1A0000352C00000100000001 /* SilentAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentAudioPlayer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +102,7 @@
 				1A0000142C00000100000001 /* YouTubeWebView.swift */,
 				1A0000152C00000100000001 /* WebViewCoordinator.swift */,
 				1A0000162C00000100000001 /* MediaManager.swift */,
+				1A0000352C00000100000001 /* SilentAudioPlayer.swift */,
 			);
 			path = WebView;
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 				1A0000242C00000100000001 /* YouTubeWebView.swift in Sources */,
 				1A0000252C00000100000001 /* WebViewCoordinator.swift in Sources */,
 				1A0000262C00000100000001 /* MediaManager.swift in Sources */,
+				1A0000362C00000100000001 /* SilentAudioPlayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

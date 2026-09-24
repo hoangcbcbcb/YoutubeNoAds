@@ -11,6 +11,7 @@ import AVFoundation
 @main
 struct TubeShieldApp: App {
     @StateObject private var settings = AppSettings.shared
+    @Environment(\.scenePhase) private var scenePhase
     
     init() {
         configureAudioSession()
@@ -25,13 +26,20 @@ struct TubeShieldApp: App {
                     configureAudioSession()
                 }
         }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .background || newPhase == .inactive {
+                // Ensure audio session and silent keeper remain active when user locks screen
+                configureAudioSession()
+            }
+        }
     }
     
     private func configureAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .moviePlayback, options: [.allowAirPlay, .allowBluetoothA2DP])
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowAirPlay, .allowBluetoothA2DP])
             try session.setActive(true)
+            SilentAudioPlayer.shared.start()
         } catch {
             print("Failed to configure AVAudioSession: \(error.localizedDescription)")
         }
